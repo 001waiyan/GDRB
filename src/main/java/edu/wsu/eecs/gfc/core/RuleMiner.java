@@ -380,12 +380,13 @@ public class RuleMiner<VT, ET> {
                 bestSieve = i;
             }
         }
-
-        if (sieveSets.get(bestSieve).isEmpty()) {
+        Set<OGFCRule<VT, ET>> x = sieveSets.get(bestSieve);
+        if (x == null || x.isEmpty()) {
             System.out.println("[OGFC_stream]: No rules were found. Try to lower the support/confidence thresholds.");
+            return new ArrayList<>();
         }
 
-        return new ArrayList<>(sieveSets.get(bestSieve));
+        return new ArrayList<>(x);
     }
 
     private double getMarginalGain(OGFCRule<VT, ET> phi, Set<OGFCRule<VT, ET>> sPSet, List<Edge<VT, ET>> positiveExamples) {

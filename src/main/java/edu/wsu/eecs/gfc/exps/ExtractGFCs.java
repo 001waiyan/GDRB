@@ -6,6 +6,7 @@ import edu.wsu.eecs.gfc.core.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,9 +19,9 @@ import org.json.JSONObject;
  * The caller to test GFC mining.
  * @author Peng Lin penglin03@gmail.com
  */
-public class TestGFC {
+public class ExtractGFCs {
 
-    private static final int GLOBAL_HOPS = 2;
+    private static final int GLOBAL_HOPS = 0;
 
     public static void main(String[] args) throws Exception {
         String inputDir = args[0];
@@ -98,38 +99,26 @@ public class TestGFC {
             for (OGFCRule<String, String> rule: patterns) {
                 JSONObject currPatternJson = new JSONObject();
 
-                JSONObject nodesJson = new JSONObject();
-                for (Node<String> node: rule.P().nodeIter()) {
-                    nodesJson.put(node.id().toString(), node.label());
+                Map<Object, String> nodeMap = new HashMap<>();
+
+                for(Node<String> node: rule.P().nodeIter()) {
+                    nodeMap.put(node.id(), node.label());
                 }
-                currPatternJson.put("nodes", nodesJson);
 
                 JSONArray edgesJson = new JSONArray();
                 for (Edge<String, String> edge: rule.P().edgeIter()) {
                     JSONObject currEdgeJson = new JSONObject();
-                    currEdgeJson.put("src", edge.srcId().toString());
-                    currEdgeJson.put("dst", edge.dstId().toString());
+                    currEdgeJson.put("src", nodeMap.get(edge.srcId()));
+                    currEdgeJson.put("dst", nodeMap.get(edge.dstId()));
                     currEdgeJson.put("label", edge.label());
                     edgesJson.put(currEdgeJson);
                 }
-                currPatternJson.put("edges", edgesJson);
+                currPatternJson.put("relations", edgesJson);
 
                 currPatternJson.put("supp", rule.supp);
                 currPatternJson.put("conf", rule.conf);
-                currPatternJson.put("gTest", rule.gTest);
-                currPatternJson.put("pCov", rule.pCov);
 
                 allPatternsJson.put(currPatternJson);
-
-                System.out.println("=================== RULE ===================");
-                System.out.println(rule.P().toGraphString());
-                System.out.println();
-                System.out.println("Support: " + rule.supp);
-                System.out.println("Confidence: " + rule.conf);
-                System.out.println("Significance: " + rule.gTest);
-                System.out.println("Coverage Score: " + rule.pCov);
-                System.out.println("============================================");
-                System.out.println();
             }
 
             currRule.put("patterns", allPatternsJson);
@@ -145,15 +134,3 @@ public class TestGFC {
         System.out.println("-------------------DONE-----------------");
     }
 }
-
-/** Invocation:
-java -cp ./target/factchecking-1.0-SNAPSHOT-jar-with-dependencies.jar \
-    edu.wsu.eecs.gfc.exps.TestGFC \
-        ./sample_data/ \
-        ./output \
-        ./rules.json \
-        0.01 \
-        0.0001 \
-        4 \
-        50
- */
