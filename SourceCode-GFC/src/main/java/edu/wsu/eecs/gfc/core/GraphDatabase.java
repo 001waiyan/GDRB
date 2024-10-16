@@ -85,6 +85,9 @@ public class GraphDatabase<VT, ET> {
 
     public GraphDatabase<VT, ET> buildSimLabelsMap(int hops) {
         labelSimLabels = new HashMap<>();
+        if (ontoIndex == null) {
+            return this;
+        }
         for (VT nodeLabel : ontoIndex.keySet()) {
             labelSimLabels.put(nodeLabel, new HashSet<>());
         }
@@ -93,7 +96,6 @@ public class GraphDatabase<VT, ET> {
                 labelSimLabels.get(nodeLabel).addAll(ontoIndex.get(nodeLabel).get(i));
             }
         }
-
         return this;
     }
 
@@ -191,7 +193,7 @@ public class GraphDatabase<VT, ET> {
     }
 
     public Set<VT> getSimLabels(VT label) {
-        if (!labelSimLabels.containsKey(label)) {
+        if (labelSimLabels == null || !labelSimLabels.containsKey(label)) {
             return new HashSet<>();
         } else {
             return labelSimLabels.get(label);
