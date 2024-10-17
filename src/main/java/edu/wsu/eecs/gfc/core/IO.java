@@ -228,26 +228,6 @@ public class IO {
         return graph;
     }
 
-    public static Map<String, Set<String>> loadOntology(String inputDir) throws IOException {
-        Map<String, Set<String>> subclassMap = new HashMap<>();
-
-        BufferedReader br = new BufferedReader(new FileReader(new File(inputDir, "gfc_str_ontology.tsv")));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] tokens = line.split("\t");
-            String child = tokens[0];
-            subclassMap.putIfAbsent(child, new HashSet<>());
-            for (int i = 1; i < tokens.length; i++) {
-                if (!tokens[i].equals(child)) {
-                    subclassMap.get(child).add(tokens[i]);
-                }
-            }
-        }
-        br.close();
-
-        return subclassMap;
-    }
-
     public static DirectedAcyclicGraph<String, String> loadDAGOntology(String inputDir) throws IOException {
         Graph<String, String> g = Graph.createEmptyGraph();
         BufferedReader br = new BufferedReader(new FileReader(new File(inputDir, "gfc_str_ontology.tsv")));
@@ -256,7 +236,7 @@ public class IO {
         while ((line = br.readLine()) != null) {
             String tokens[] = line.split("\t");
             String child = tokens[0];
-            String parent = tokens[3];
+            String parent = tokens[1];
             if (!g.hasNodeId(child)) {
                 g.createNode(child, child);
             }

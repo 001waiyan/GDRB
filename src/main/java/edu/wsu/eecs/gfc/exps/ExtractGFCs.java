@@ -21,7 +21,7 @@ import org.json.JSONObject;
  */
 public class ExtractGFCs {
 
-    private static final int GLOBAL_HOPS = 0;
+    private static final int GLOBAL_HOPS = 2;
 
     public static void main(String[] args) throws Exception {
         String inputDir = args[0];

@@ -19,15 +19,14 @@ JDK 1.8+ and Maven 3.0+
 `ExtractGFCs` expects 7 arguments:
 
 1. `inputDir`: Directory of input files. The following files should be present:
-
    - `gfc_str_nodes.tsv`: Nodes in the graph
-     Fields: `id`, `label`
+   		Fields: `id`, `label`
    - `gfc_str_edges.tsv`: Edges in the graph
-     Fields: `srcId`, `dstId`, `label`
+     	Fields: `srcId`, `dstId`, `label`
    - `gfc_input_relations.tsv`: Relations to extract rules from
-     Fields: `srcLabel`, `dstLabel`, `edgeLabel`
+     	Fields: `srcLabel`, `dstLabel`, `edgeLabel`
    - `gfc_str_ontology.tsv`: Ontology of graph
-     Fields:
+     	Fields: `childLabel`, `parentLabel`
 2. `outputDir`: Directory of the output file. Will be created if doesn't exist.
 3. `outputFileName` Name of the output json file. Will be overriden if already exists.
 4. `minSupp`: Minimum support of GFCs, Range: [0.0, 1.0]
