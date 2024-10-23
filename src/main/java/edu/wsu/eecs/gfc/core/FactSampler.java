@@ -16,7 +16,7 @@ public class FactSampler<VT, ET> {
     private Map<Boolean, List<Edge<VT, ET>>> dataTest;
 
     private static final Random DEFAULT_SEED = new Random(357);
-    private static final double DEFAULT_PERCENTAGE_OF_TRAIN = 0.8;
+    private static final double DEFAULT_PERCENTAGE_OF_TRAIN = 1.0;//0.8;
     private static final double DEFAULT_NEG_POS_RATIO = 4;
 
     public FactSampler(GraphDatabase<VT, ET> bigGraph, List<Relation<VT, ET>> relationList) {
@@ -58,18 +58,18 @@ public class FactSampler<VT, ET> {
             int nNeg = (int) (nPos * DEFAULT_NEG_POS_RATIO);
 
             List<Edge<VT, ET>> posExamples = new ArrayList<>(bigGraph.getEdges(r));
-            Set<Integer> posTestIndex = new HashSet<>();
-            for (int i : DEFAULT_SEED.ints(0, posExamples.size()).distinct()
-                    .limit((int) (posExamples.size() * (1 - DEFAULT_PERCENTAGE_OF_TRAIN))).toArray()) {
-                posTestIndex.add(i);
-            }
+            // Set<Integer> posTestIndex = new HashSet<>();
+            // for (int i : DEFAULT_SEED.ints(0, posExamples.size()).distinct()
+            //         .limit((int) (posExamples.size() * (1 - DEFAULT_PERCENTAGE_OF_TRAIN))).toArray()) {
+            //     posTestIndex.add(i);
+            // }
 
             for (int i = 0; i < posExamples.size(); i++) {
-                if (!posTestIndex.contains(i)) {
+                // if (!posTestIndex.contains(i)) {
                     dataTrain.get(true).add(posExamples.get(i));
-                } else {
-                    dataTest.get(true).add(posExamples.get(i));
-                }
+                // } else {
+                //     dataTest.get(true).add(posExamples.get(i));
+                // }
             }
 
             List<Edge<VT, ET>> negExamples = new ArrayList<>(nNeg);
@@ -121,7 +121,7 @@ public class FactSampler<VT, ET> {
 
             if (negExamples.size() != 0) {
                 dataTrain.get(false).addAll(new ArrayList<>(negExamples.subList(0, negCut)));
-                dataTest.get(false).addAll(new ArrayList<>(negExamples.subList(negCut + 1, negExamples.size())));
+                // dataTest.get(false).addAll(new ArrayList<>(negExamples.subList(negCut + 1, negExamples.size())));
             }
         }
 

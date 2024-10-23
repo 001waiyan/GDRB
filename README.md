@@ -12,37 +12,35 @@ This is a forked repository of [GDRB](https://github.com/wsu-db/GDRB), for the p
 
 JDK 1.8+ and Maven 3.0+
 
-### ExtractGFCs
+### FactChecker
 
 #### Arguments
 
-`ExtractGFCs` expects 7 arguments:
+`FactChecker` expects 7 arguments:
 
 1. `inputDir`: Directory of input files. The following files should be present:
-   - `gfc_str_nodes.tsv`: Nodes in the graph
-   		Fields: `id`, `label`
-   - `gfc_str_edges.tsv`: Edges in the graph
-     	Fields: `srcId`, `dstId`, `label`
-   - `gfc_input_relations.tsv`: Relations to extract rules from
-     	Fields: `srcLabel`, `dstLabel`, `edgeLabel`
-   - `gfc_str_ontology.tsv`: Ontology of graph
-     	Fields: `childLabel`, `parentLabel`
-2. `outputDir`: Directory of the output file. Will be created if doesn't exist.
-3. `outputFileName` Name of the output json file. Will be overriden if already exists.
-4. `minSupp`: Minimum support of GFCs, Range: [0.0, 1.0]
-5. `minConf`: Minimum confidence of GFCs, Range: [0.0, 1.0]
-6. `maxSize`: Maximum size of extracted patterns
-7. `topK`: Number of patterns extracted for each relation
+   - `graph_nodes.tsv`: Nodes in the graph.
+   		- Fields: `id`, `label`
+   - `graph_edges.tsv`: Edges in the graph.
+   		- Fields: `srcId`, `dstId`, `edgeLabel`
+   - `graph_ontology.tsv`: Ontology of graph.
+   		- Fields: `childLabel`, `parentLabel`
+   - `input_edges.tsv`: Edges to test for confidence. All edges should be for the same relation type.
+   		- Fields: `srcId`, `dstId`, `edgeLabel`
+1. `outputDir`: Directory of the output files. Will be created if doesn't exist.
+1. `minSupp`: Minimum support of GFCs, Range: [0.0, 1.0]
+1. `minConf`: Minimum confidence of GFCs, Range: [0.0, 1.0]
+1. `maxSize`: Maximum size of extracted patterns
+1. `topK`: Number of patterns extracted for each relation
 
 #### Invocation Example
 
 ```
 $ mvn package
 $ java -cp ./target/factchecking-1.0-SNAPSHOT-jar-with-dependencies.jar \
-    edu.wsu.eecs.gfc.exps.ExtractGFCs \
+    edu.wsu.eecs.gfc.exps.FactChecker \
         ./sample_data/ \
         ./output \
-        ./rules.json \
         0.01 \
         0.0001 \
         4 \
@@ -50,41 +48,53 @@ $ java -cp ./target/factchecking-1.0-SNAPSHOT-jar-with-dependencies.jar \
 ```
 
 #### Output Schema
-
+##### `patterns.json`
 ```json
-   [
-   	{
-   		"src": "srcLabel",
-   		"dst": "dstLabel",
-   		"label": "edgeLabel",
-   		"patterns": [
-   			{
-   				"relations": [
-   					{
-   						"src": "srcLabel",
-   						"dst": "dstLabel",
-   						"label": "edgeLabel"
-   					}
-   				],
-   				"supp": [0.0, 1.0],
-   				"conf": [0.0, 1.0]
-   			}
-   		]
-   	}
-   ]
+[
+	{
+		"relations": [
+			{
+				"srcLabel": "srcLabel",
+				"dstLabel": "dstLabel",
+				"edgeLabel": "edgeLabel"
+			}
+		],
+		"supp": [0.0, 1.0],
+		"conf": [0.0, 1.0]
+	}
+]
 ```
-
-   rules: array of objects, one for each relation in `gfc_input_relations.tsv`
-	- src: string, label of source node in relation
-	- dst: string, label of destination node in relation
-	- label: string, label of relation
-	- patterns: array of objects, `topK` patterns
-		- relations: array of objects, relations in the extracted pattern
-			- src: string, label of source node in pattern relation
-			- dst: string, label of destination node in pattern relation
-			- label: string, label of pattern relation
-		- supp: double, support of pattern
-		- conf: double, confidence of pattern
+```
+array of objects, topK patterns
+	⎿ relations: array of objects, relations in the extracted pattern
+		⎿  srcLabel: string, label of source node in pattern relation
+		⎿  dstLabel: string, label of destination node in pattern relation
+		⎿  edgeLabel: string, label of pattern relation
+	⎿  supp: double, support of pattern
+	⎿  conf: double, confidence of pattern
+```
+##### `results.json`
+```json
+[
+	{
+		"srcId": "srcId",
+		"dstId": "dstId",
+		"label": "edgeLabel",
+		"hits": [0, "topK"],
+		"maxConf": [0.0, 1.0],
+		"suppForMaxConf": [0.0, 1.0],
+		"maxScore": [0.0, 1.0]
+	}
+]
+```
+```
+array of objects, fact checking scores of input edges
+	⎿  src: string, id of source node in edge
+	⎿  dst: string, id of destination node in edge
+	⎿  edgeLabel: string, label of edge
+	⎿  supp: double, support of pattern
+	⎿  conf: double, confidence of pattern
+```
 
 ## GFC documents
 

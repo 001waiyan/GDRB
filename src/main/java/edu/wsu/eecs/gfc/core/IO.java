@@ -206,7 +206,7 @@ public class IO {
         Graph<String, String> graph = Graph.createEmptyGraph();
         BufferedReader br;
         String line;
-        br = new BufferedReader(new FileReader(new File(inputDir, "gfc_str_nodes.tsv")));
+        br = new BufferedReader(new FileReader(new File(inputDir, "graph_nodes.tsv")));
         while ((line = br.readLine()) != null) {
             String[] tokens = line.split("\t");
             String id = tokens[0].intern();
@@ -215,7 +215,7 @@ public class IO {
         }
         br.close();
 
-        br = new BufferedReader(new FileReader(new File(inputDir, "gfc_str_edges.tsv")));
+        br = new BufferedReader(new FileReader(new File(inputDir, "graph_edges.tsv")));
         while ((line = br.readLine()) != null) {
             String[] tokens = line.split("\t");
             String srcId = tokens[0].intern();
@@ -230,7 +230,7 @@ public class IO {
 
     public static DirectedAcyclicGraph<String, String> loadDAGOntology(String inputDir) throws IOException {
         Graph<String, String> g = Graph.createEmptyGraph();
-        BufferedReader br = new BufferedReader(new FileReader(new File(inputDir, "gfc_str_ontology.tsv")));
+        BufferedReader br = new BufferedReader(new FileReader(new File(inputDir, "graph_ontology.tsv")));
         String line;
         String edgeLabel = "subClassOf";
         while ((line = br.readLine()) != null) {
@@ -251,4 +251,23 @@ public class IO {
 
         return DirectedAcyclicGraph.createFromGraph(g, true, true);
     }
+
+    public static List<Edge<String, String>> loadInputEdges(Graph<String, String> graph, String inputDir) throws IOException {
+        List<Edge<String, String>> edgeList = new ArrayList<>();
+        BufferedReader br;
+        String line;
+        br = new BufferedReader(new FileReader(new File(inputDir, "input_edges.tsv")));
+        while ((line = br.readLine()) != null) {
+            String[] tokens = line.split("\t");
+            String srcId = tokens[0].intern();
+            String dstId = tokens[1].intern();
+            String edgeLabel = tokens[2].intern();
+            Node<String> src = graph.getNode(srcId);
+            Node<String> dst = graph.getNode(dstId);
+            edgeList.add(Edge.createLabeledEdge(src, dst, edgeLabel));
+        }
+        br.close();
+        return edgeList;
+    }
+
 }
