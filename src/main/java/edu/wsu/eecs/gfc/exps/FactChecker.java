@@ -2,9 +2,7 @@ package edu.wsu.eecs.gfc.exps;
 
 import edu.wsu.eecs.gfc.core.*;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,30 +21,19 @@ public class FactChecker {
 
     private static final int GLOBAL_HOPS = 2;
 
-    public static void main(String[] args) throws Exception {
-        String inputDir = args[0];
-        String outputDir = args[1];
-        new File(outputDir).mkdirs();
-
-        double minSupp = Double.parseDouble(args[2]);
-        double minConf = Double.parseDouble(args[3]);
-        int maxSize = Integer.parseInt(args[4]);
-        int topK = Integer.parseInt(args[5]);
-
-        System.out.println("Configurations:"
-                + "\ninputDir = " + inputDir
-                + "\noutputDir = " + outputDir
-                + "\nminSupp = " + minSupp
-                + "\nminConf = " + minConf
-                + "\nmaxSize = " + maxSize
-                + "\ntop-K = " + topK);
+    public static void main(String[] args) throws Exception{
+        String tempDir = args[0];
+        double minSupp = Double.parseDouble(args[1]);
+        double minConf = Double.parseDouble(args[2]);
+        int maxSize = Integer.parseInt(args[3]);
+        int topK = Integer.parseInt(args[4]);
 
         System.out.println("Loading the data graph....");
-        Graph<String, String> graph = IO.loadStringGraph(inputDir);
+        Graph<String, String> graph = IO.loadStringGraph(tempDir);
         System.out.println("Graph: " + graph.toSizeString());
 
         System.out.println("Loading the ontology....");
-        DirectedAcyclicGraph<String, String> onto = IO.loadDAGOntology(inputDir);
+        DirectedAcyclicGraph<String, String> onto = IO.loadDAGOntology(tempDir);
         System.out.println("Indexing the ontology....");
         Map<String, Map<Integer, Set<String>>> ontoIndex = Utility.indexOntology(onto, GLOBAL_HOPS);
 
@@ -55,11 +42,10 @@ public class FactChecker {
         System.out.println("BigGraph: " + bigGraph.toSizeString());
 
         System.out.println("Loading input edges....");
-        List<Edge<String, String>> inputEdges = IO.loadInputEdges(graph, inputDir);
+        List<Edge<String, String>> inputEdges = IO.loadInputEdges(graph, tempDir);
 
         if (inputEdges.size() == 0) {
-            System.out.println("No input edges provided. Stopping....");
-            return;
+            throw new Exception("No input edges provided.");
         }
 
         String srcLabel = inputEdges.get(0).srcLabel();
@@ -77,11 +63,6 @@ public class FactChecker {
         bigGraph.buildSimLabelsMap(0);
 
         List<OGFCRule<String, String>> patterns = miner.OGFC_stream(relation, sampler.getDataTrain().get(true), sampler.getDataTrain().get(false));
-
-        if (patterns.size() == 0) {
-            System.out.println("No patterns found. Stopping....");
-            return;
-        }
 
         System.out.println("Discovered number of patterns: |P| = " + patterns.size());
 
@@ -110,9 +91,6 @@ public class FactChecker {
 
             allPatternsJson.put(currPatternJson);
         }
-        FileWriter jsonFileWriter = new FileWriter(new File(outputDir, "patterns.json"));
-        jsonFileWriter.write(allPatternsJson.toString(4));
-        jsonFileWriter.close();
         
         System.out.println("Checking pattern coverage for input edges....");
         boolean multipleRelations = false;
@@ -155,8 +133,12 @@ public class FactChecker {
             System.out.println("Warning: Multiple relation types found in input edges.");
         }
 
-        jsonFileWriter = new FileWriter(new File(outputDir, "results.json"));
-        jsonFileWriter.write(resultsJson.toString(4));
+        JSONObject combinedJson = new JSONObject();
+        combinedJson.put("patterns", allPatternsJson);
+        combinedJson.put("results", resultsJson);
+        
+        FileWriter jsonFileWriter = new FileWriter(new File(tempDir, "output.json"));
+        jsonFileWriter.write(combinedJson.toString(4));
         jsonFileWriter.close();
         System.out.println("-------------------DONE-----------------");
     }
