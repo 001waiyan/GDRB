@@ -103,19 +103,10 @@ public class FactChecker {
                 continue;
             }
             int hits = 0;
-            double maxConf = 0.0;
-            double suppForMaxConf = 0.0;
-            double maxScore = 0.0;
             for (OGFCRule<String, String> p : patterns) {
                 if (p.matchSet().get(p.x()).contains(edge.srcNode())
                         && p.matchSet().get(p.y()).contains(edge.dstNode())) {
                     hits++;
-                    if (p.conf > maxConf) {
-                        maxConf = p.conf;
-                        suppForMaxConf = p.supp;
-                    }
-                    double score = p.conf * p.supp;
-                    maxScore = (score > maxScore) ? score : maxScore;
                 }
             }
             JSONObject currEdgeJson = new JSONObject();
@@ -123,9 +114,6 @@ public class FactChecker {
             currEdgeJson.put("dstId", edge.dstId());
             currEdgeJson.put("edgeLabel", edge.label());
             currEdgeJson.put("hits", hits);
-            currEdgeJson.put("maxConf", maxConf);
-            currEdgeJson.put("suppForMaxConf", suppForMaxConf);
-            currEdgeJson.put("maxScore", maxScore);
             resultsJson.put(currEdgeJson);
         }
 
