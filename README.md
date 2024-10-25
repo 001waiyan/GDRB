@@ -1,29 +1,41 @@
 # FactChecker API
 
-A REST API FactChecker tool that analyzes graph data and computes confidence scores for relationships. This is a forked repository of [GDRB](https://github.com/wsu-db/GDRB), for the purposes of integration with [WW_AI_GK](https://github.com/AY2425S1-DSA3101-Weeping-Wranglers/WW-AI-GK).
+This is a forked repository of [GDRB](https://github.com/wsu-db/GDRB), for the purposes of integration with [WW_AI_GK](https://github.com/AY2425S1-DSA3101-Weeping-Wranglers/WW-AI-GK).
 
-## Prerequisites
+This tool runs the GFC mining algorithm to extract rules (GFCs) from a knowledge graph. The given input edges are then checked if they are supported by the extracted rules. A REST API was set up using Spring Boot.
+
+## Running the API
+
+### Run Docker Image from GHCR
+
+```bash
+docker run -p 8080:8080 ghcr.io/001waiyan/factchecker-api:latest
+```
+
+### Build and Run
+
+#### Build and run with Docker
+
+```bash
+docker build -t factchecker-api
+docker run -p 8080:8080 factchecker-api
+```
+
+#### Build and run manually
+
+Prerequisites:
 
 - Java 11 or higher
 - Maven 3.6 or higher
 
-## Running the API
-
-Build the project:
-
-   ```bash
-   mvn clean package
-   ```
-
-Start the server:
-
 ```bash
+mvn clean package
 java -jar target/factchecker-api-1.0-SNAPSHOT.jar
 ```
 
-The API will be available at `http://localhost:8080`.
-
 ## API Endpoints
+
+The API will be available at `http://localhost:8080`.
 
 ### Check Facts
 
@@ -57,13 +69,13 @@ Analyzes graph data and computes confidence scores.
 
 ```bash
 curl -X POST \
-  -F "graphNodes=@path/to/graph_nodes.tsv" \
-  -F "graphEdges=@path/to/graph_edges.tsv" \
-  -F "graphOntology=@path/to/graph_ontology.tsv" \
-  -F "inputEdges=@path/to/input_edges.tsv" \
+  -F "graphNodes=@sample_data/graph_nodes.tsv" \
+  -F "graphEdges=@sample_data/graph_edges.tsv" \
+  -F "graphOntology=@sample_data/graph_ontology.tsv" \
+  -F "inputEdges=@sample_data/input_edges.tsv" \
   -F "minSupp=0.01" \
   -F "minConf=0.0001" \
-  -F "maxSize=4" \
+  -F "maxSize=2" \
   -F "topK=50" \
   http://localhost:8080/api/factchecker/check
 ```
@@ -93,13 +105,14 @@ Type1         ParentType1
 ```
 
 ### input_edges.tsv
-
+Note: All edges must be for the same relation type (i.e. same srcLabel, dstLabel and edgeLabel)
 ```
 srcId    dstId    edgeLabel
 1        2        relationshipToTest
 ```
 
 ## Output Schema
+
 ```json
 {
     "patterns": [
@@ -120,15 +133,13 @@ srcId    dstId    edgeLabel
             "srcId": "srcId",
             "dstId": "dstId",
             "label": "edgeLabel",
-            "hits": [0, "topK"],
-            "maxConf": [0.0, 1.0],
-            "suppForMaxConf": [0.0, 1.0],
-            "maxScore": [0.0, 1.0]
+            "hits": [0, "topK"]
         }
     ]
 }
 
 ```
+
 ```
 "patterns": array of objects, topK patterns
 	⎿ relations: array of objects, relations in the extracted pattern
@@ -138,11 +149,10 @@ srcId    dstId    edgeLabel
 	⎿  supp: double, support of pattern
 	⎿  conf: double, confidence of pattern
 "rules": array of objects, fact checking scores of input edges
-	⎿  src: string, id of source node in edge
-	⎿  dst: string, id of destination node in edge
+	⎿  srcId: string, id of source node in edge
+	⎿  dstId: string, id of destination node in edge
 	⎿  edgeLabel: string, label of edge
-	⎿  supp: double, support of pattern
-	⎿  conf: double, confidence of pattern
+	⎿  hits: int, number of patterns that cover the edge
 ```
 
 ## GFC documents
