@@ -517,4 +517,33 @@ public class Graph<VT, ET> {
     public Map<Integer, Set<Node<VT>>> nodesTo(Object centerId, int radius) {
         return nodesTo(getNode(centerId), radius);
     }
+
+    public boolean isWeaklyConnected() {
+        if (isEmpty()) {
+            return true;
+        }
+    
+        Node<VT> startNode = getNodeCollection().iterator().next();
+    
+        Set<Node<VT>> visited = new HashSet<>();
+        Deque<Node<VT>> stack = new ArrayDeque<>();
+        stack.push(startNode);
+    
+        // DFS ignoring the direction of the edges.
+        while (!stack.isEmpty()) {
+            Node<VT> current = stack.pop();
+            if (!visited.contains(current)) {
+                visited.add(current);
+    
+                Set<Node<VT>> neighbors = oneHopNeighbors(current);
+                for (Node<VT> neighbor : neighbors) {
+                    if (!visited.contains(neighbor)) {
+                        stack.push(neighbor);
+                    }
+                }
+            }
+        }
+    
+        return visited.size() == numOfNodes;
+    }
 }

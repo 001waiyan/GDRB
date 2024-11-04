@@ -5,7 +5,6 @@ import edu.wsu.eecs.gfc.core.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,30 +63,39 @@ public class FactChecker {
 
         List<OGFCRule<String, String>> patterns = miner.OGFC_stream(relation, sampler.getDataTrain().get(true), sampler.getDataTrain().get(false));
 
-        System.out.println("Discovered number of patterns: |P| = " + patterns.size());
+        List<OGFCRule<String, String>> filteredPatterns = new ArrayList<>();
+
+        for (OGFCRule<String, String> p: patterns) {
+            if (p.P().isWeaklyConnected()) {
+                filteredPatterns.add(p);
+            }
+        }
+
+        System.out.println("Discovered number of patterns: |P| = " + filteredPatterns.size());
 
         JSONArray allPatternsJson = new JSONArray();
-        for (OGFCRule<String, String> rule: patterns) {
-            JSONObject currPatternJson = new JSONObject();
-
-            Map<Object, String> nodeMap = new HashMap<>();
-
-            for(Node<String> node: rule.P().nodeIter()) {
-                nodeMap.put(node.id(), node.label());
-            }
+        for (OGFCRule<String, String> p: filteredPatterns) {
 
             JSONArray edgesJson = new JSONArray();
-            for (Edge<String, String> edge: rule.P().edgeIter()) {
+            for (Edge<String, String> edge: p.P().edgeIter()) {
                 JSONObject currEdgeJson = new JSONObject();
-                currEdgeJson.put("srcLabel", nodeMap.get(edge.srcId()));
-                currEdgeJson.put("dstLabel", nodeMap.get(edge.dstId()));
+                currEdgeJson.put("srcId", edge.srcId());
+                currEdgeJson.put("dstId", edge.dstId());
                 currEdgeJson.put("edgeLabel", edge.label());
                 edgesJson.put(currEdgeJson);
             }
-            currPatternJson.put("relations", edgesJson);
 
-            currPatternJson.put("supp", rule.supp);
-            currPatternJson.put("conf", rule.conf);
+            JSONArray nodesJson = new JSONArray();
+            for(Node<String> node: p.P().nodeIter()) {
+                nodesJson.put(node.label());
+            }
+
+            JSONObject currPatternJson = new JSONObject();
+            currPatternJson.put("nodes", nodesJson);
+            currPatternJson.put("edges", edgesJson);
+
+            currPatternJson.put("supp", p.supp);
+            currPatternJson.put("conf", p.conf);
 
             allPatternsJson.put(currPatternJson);
         }
@@ -103,7 +111,7 @@ public class FactChecker {
                 continue;
             }
             int hits = 0;
-            for (OGFCRule<String, String> p : patterns) {
+            for (OGFCRule<String, String> p : filteredPatterns) {
                 if (p.matchSet().get(p.x()).contains(edge.srcNode())
                         && p.matchSet().get(p.y()).contains(edge.dstNode())) {
                     hits++;
