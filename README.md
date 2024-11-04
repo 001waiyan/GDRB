@@ -4,6 +4,10 @@ This is a forked repository of [GDRB](https://github.com/wsu-db/GDRB), for the p
 
 This tool runs the GFC mining algorithm to extract rules (GFCs) from a knowledge graph. The given input edges are then checked if they are supported by the extracted rules. A REST API was set up using Spring Boot.
 
+Modifications:
+1. Added support for multiple edges between nodes
+2. Filters for patterns that are at least weakly connected so as to generate more useful patterns.
+
 ## Running the API
 
 ### Run Docker Image from GHCR
@@ -148,7 +152,7 @@ srcId    dstId    edgeLabel
 		⎿  edgeLabel: string, label of pattern relation
 	⎿  supp: double, support of pattern
 	⎿  conf: double, confidence of pattern
-"rules": array of objects, fact checking scores of input edges
+"results": array of objects, fact checking scores of input edges
 	⎿  srcId: string, id of source node in edge
 	⎿  dstId: string, id of destination node in edge
 	⎿  edgeLabel: string, label of edge

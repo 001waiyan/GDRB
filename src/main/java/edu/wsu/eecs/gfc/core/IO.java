@@ -221,7 +221,19 @@ public class IO {
             String srcId = tokens[0].intern();
             String dstId = tokens[1].intern();
             String edgeLabel = tokens[2].intern();
-            graph.createEdge(srcId, dstId, edgeLabel);
+            if (graph.hasNodeId(srcId) && graph.hasNodeId(dstId)) {
+                Node<String> srcNode = graph.getNode(srcId);
+                Node<String> dstNode = graph.getNode(dstId);
+                Edge<String, String> existingEdge = graph.removeEdge(srcNode, dstNode);
+                if (existingEdge != null) {
+                    String[] labels = existingEdge.label().split("&");
+                    String[] newLabels = Arrays.copyOf(labels, labels.length + 1);
+                    newLabels[labels.length] = edgeLabel;
+                    Arrays.sort(newLabels);
+                    edgeLabel = String.join("&", newLabels);
+                }
+                graph.createEdge(srcId, dstId, edgeLabel);
+            }
         }
         br.close();
 
