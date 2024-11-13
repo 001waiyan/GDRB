@@ -5,6 +5,7 @@ This is a forked repository of [GDRB](https://github.com/wsu-db/GDRB), for the p
 This tool runs the GFC mining algorithm to extract rules (GFCs) from a knowledge graph. The given input edges are then checked if they are supported by the extracted rules. A REST API was set up using Spring Boot.
 
 Modifications:
+
 1. Added support for multiple edges between nodes
 2. Filters for patterns that are at least weakly connected so as to generate more useful patterns.
 
@@ -21,7 +22,7 @@ docker run -p 8080:8080 ghcr.io/001waiyan/factchecker-api:latest
 #### Build and run with Docker
 
 ```bash
-docker build -t factchecker-api
+docker build -t factchecker-api .
 docker run -p 8080:8080 factchecker-api
 ```
 
@@ -43,7 +44,7 @@ The API will be available at `http://localhost:8080`.
 
 ### Check Facts
 
-Analyzes graph data and computes confidence scores.
+Extracts GFCs from graph for the input edges. The input edges are then checked if they are supported by the extracted rules.
 
 **URL**: `/api/factchecker/check`
 
@@ -109,7 +110,9 @@ Type1         ParentType1
 ```
 
 ### input_edges.tsv
+
 Note: All edges must be for the same relation type (i.e. same srcLabel, dstLabel and edgeLabel)
+
 ```
 srcId    dstId    edgeLabel
 1        2        relationshipToTest
